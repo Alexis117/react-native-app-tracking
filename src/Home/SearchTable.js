@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Scrol } from 'react-native';
 import { useQuery, gql } from '@apollo/client'
 import { printIntrospectionSchema } from 'graphql';
 
 const GET_USERS = gql`
-query {
-    allUsersFilter{
+query allUsersFilter($searchString:String){
+    allUsersFilter(searchString:$searchString){
+        id
         name
         lastName
         email
@@ -13,35 +14,26 @@ query {
 }
 `
 export default function SearchTable(props) {
-    const { data, loading, error } = useQuery(GET_USERS);
+    const [ search, setSearch ] = useState('')
+    const { data, loading, error } = useQuery(GET_USERS, {variables:{searchString:search}});
 
-    if (data) console.log(data)
-
-    const UsersList = () => {
-        if (data) return (
-            <FlatList
-                data={data.allUsersFilter}
-                renderItem={ () =>
-                    <Text>Hola</Text>
-                }
-            />
-        )
-        else return <Text>Loading</Text>
-    }
+    if (error) console.log(error)
 
     return(
         <View style={styles.container}>
             <View style={styles.searchContainer}>
                 <TextInput
                     style = {styles.textInput}
-                    //value = {email}
-                    //onChangeText = {text => setEmail(text)}
+                    value = {search}
+                    onChangeText = {text => setSearch(text)}
                     placeholder='Buscar usuario'
                 />
             </View>
             <View style={styles.box}>
                 <FlatList
                     data={data ? data.allUsersFilter : []}
+                    ListEmptyComponent = {() =><Text>No results found</Text>}
+                    keyExtractor={item => item.id}
                     renderItem={({item}) => {
                         if (props.userInfo.email != item.email) return (
                             <View style={styles.row}>
@@ -75,7 +67,7 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderColor: 'black',
         borderWidth: 1,
-        height: '60%'
+        height: '65%'
     },
     row: {
         flexDirection: 'row'

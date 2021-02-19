@@ -156,7 +156,7 @@ export default function Navigation() {
                             }}/>
                         </AuthStack.Navigator>
                     ) : (
-                        <Tab.Navigator>
+                        <Tab.Navigator tabBarOptions={{keyboardHidesTabBar: true}}>
                             <Tab.Screen name="Home" component={Home} />
                             <Tab.Screen name="Pedidos" component={Test} />
                         </Tab.Navigator>
