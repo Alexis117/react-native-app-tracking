@@ -1,7 +1,34 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { useQuery, gql } from '@apollo/client'
+import { printIntrospectionSchema } from 'graphql';
 
-export default function SearchTable() {
+const GET_USERS = gql`
+query {
+    allUsersFilter{
+        name
+        lastName
+        email
+    }
+}
+`
+export default function SearchTable(props) {
+    const { data, loading, error } = useQuery(GET_USERS);
+
+    if (data) console.log(data)
+
+    const UsersList = () => {
+        if (data) return (
+            <FlatList
+                data={data.allUsersFilter}
+                renderItem={ () =>
+                    <Text>Hola</Text>
+                }
+            />
+        )
+        else return <Text>Loading</Text>
+    }
+
     return(
         <View style={styles.container}>
             <View style={styles.searchContainer}>
@@ -13,20 +40,27 @@ export default function SearchTable() {
                 />
             </View>
             <View style={styles.box}>
-                <View style={styles.row}>
-                    <View style={styles.column}>
-                        <Text style={styles.userText}>Usuario 1</Text>
-                        <Text>correo@ejemplo.com</Text>
-                    </View>
-                    <View style={styles.column}>
-                        <TouchableOpacity
-                            style = {styles.button}
-                            onPress = {() => signOut()}
-                        >
-                            <Text style={styles.buttonText}>Track</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <FlatList
+                    data={data ? data.allUsersFilter : []}
+                    renderItem={({item}) => {
+                        if (props.userInfo.email != item.email) return (
+                            <View style={styles.row}>
+                                <View style={styles.column}>
+                                    <Text style={styles.userText}>{item.name} {item.lastName}</Text>
+                                    <Text>{item.email}</Text>
+                                </View>
+                                <View style={styles.column}>
+                                    <TouchableOpacity
+                                        style = {styles.button}
+                                        onPress = {() => signOut()}
+                                    >
+                                        <Text style={styles.buttonText}>Track</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        )
+                    }}
+                />
             </View>
         </View>
     )

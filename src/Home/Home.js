@@ -26,7 +26,7 @@ export default function Home() {
                 </View>
             </View>
             <View style={styles.searchContainer}>
-                <SearchTable></SearchTable>
+                <SearchTable userInfo={userInfo}></SearchTable>
             </View>
         </View>
     )
