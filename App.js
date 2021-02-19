@@ -4,15 +4,28 @@ import { ApolloProvider } from '@apollo/client';
 import { split, HttpLink } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
-import Navigation from './src/Navigation'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setContext } from 'apollo-link-context';
+
+import Navigation from './src/Navigation'
 
 const httpLink = new HttpLink({
-  uri: 'http://192.168.1.68:5000/graphql'
+  uri: 'http://192.168.1.70:5000/graphql'
 });
 
-const wsLink = new WebSocketLink({
-  uri: `ws://192.168.1.68:5000/graphql`,
+const authLink = setContext(async (_, { headers }) => {
+  const token = await AsyncStorage.getItem("userToken")
+  console.log(token)
+  return {
+    headers: {
+      ...Headers,
+      Authorization: token ? token: ""  
+      }
+  }
+});
+
+export const wsLink = new WebSocketLink({
+  uri: `ws://192.168.1.70:5000/graphql`,
   options: {
     reconnect: true,
     connectionParams: async () => ({
@@ -30,7 +43,7 @@ const splitLink = split(
     );
   },
   wsLink,
-  httpLink,
+  authLink.concat(httpLink),
 );
 
 const client = new ApolloClient({

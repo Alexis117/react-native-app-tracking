@@ -1,19 +1,33 @@
 import React, { useContext } from 'react';
-import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, View, TouchableOpacity, StatusBar } from 'react-native';
+
 import { AuthContext } from '../Navigation'
+import SearchTable from './SearchTable'
 
 export default function Home() {
-    const { signOut } = useContext(AuthContext);
+    const { signOut } = useContext(AuthContext).authContext;
+    const { userInfo } = useContext(AuthContext)
 
     return(
         <View style={styles.container}>
-            <Text>Home</Text>
-            <TouchableOpacity
-                style = {styles.button}
-                onPress = {() => signOut()}
-            >
-                <Text style={styles.whiteText}>Sign Out</Text>
-            </TouchableOpacity>
+            <StatusBar></StatusBar>
+            <View style={styles.row}>
+                <View style={styles.column}>
+                    <Text style={styles.userName}>{userInfo.name} {userInfo.lastName}</Text>
+                    <Text>{userInfo.email}</Text>
+                </View>
+                <View style={styles.column}>
+                    <TouchableOpacity
+                        style = {styles.button}
+                        onPress = {() => signOut()}
+                    >
+                        <Text style={styles.buttonText}>Sign Out</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View style={styles.searchContainer}>
+                <SearchTable></SearchTable>
+            </View>
         </View>
     )
 }
@@ -22,45 +36,33 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     button: {
+        width: '50%',
         backgroundColor: '#3273dc',
         borderRadius: 5,
         margin: 10,
         padding: 10,
     },
-    whiteText:{
-        color: 'white'
+    buttonText:{
+        color: 'white',
+        alignSelf: 'center'
     },
-    link: {
-        color:'#3273dc', 
-        textDecorationLine:'underline', 
-        alignSelf:'center'
+    userName: {
+        fontWeight: 'bold', 
+        fontSize: 18
     },
-    textInput: {
-        borderStyle: 'solid',
-        borderColor: 'black',
-        borderRadius: 4,
-        borderWidth: 1,
-        padding: 2,
-        margin: 2,
+    searchContainer: {
+        alignItems:'center', 
+        marginTop: '30%'
     },
-    form: {
-        width: '80%'
+    row: {
+        flexDirection: 'row'
     },
-    title: {
-        fontSize: 20,
-        marginBottom: 10,
-        fontWeight: 'bold'
-    },
-    subtitle: {
-        fontSize: 20,
-        marginBottom: 10,
-    },
-    error: {
-        color: 'red',
-        marginTop: 10
+    column: {
+        flexDirection: 'column',
+        margin: 20,
+        justifyContent: 'center',
+        width: '50%'
     }
 });

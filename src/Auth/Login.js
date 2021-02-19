@@ -7,7 +7,7 @@ export default function Login(props) {
     const [password, setPassword] = useState('');
     const [error, setError] = useState();
 
-    const { signIn } = useContext(AuthContext);
+    const { signIn } = useContext(AuthContext).authContext;
 
     return(
         <View style={styles.container}>
@@ -38,7 +38,7 @@ export default function Login(props) {
                 <Text style={styles.whiteText}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                onPress = {() => props.navigation.navigate('SignUp')}
+                onPress = {() => props.setAuthScreen(2)}
             >
                 <Text style={styles.link}>Sign up</Text>
             </TouchableOpacity>

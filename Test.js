@@ -23,8 +23,14 @@ subscription{
 export default function Test() {
 
     const { loading, error, data } = useSubscription(GET_LOCATION);
+    //const {loading, data, error} = useQuery(ALL_USERS);
 
-    if (loading) return <Text>Loading...</Text>;
+
+    if (loading) return (
+        <View style={styles.container}>
+            <Text>Loading...</Text>
+        </View>
+    );
     if (error) console.log(error);
     if (data) console.log(data);
 

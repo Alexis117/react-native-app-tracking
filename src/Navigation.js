@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect, useMemo } from 'react';
+import React, { createContext, useReducer, useEffect, useMemo, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -7,10 +7,12 @@ import { useMutation, gql } from '@apollo/client'
 
 import { Text } from 'react-native';
 
+import Auth from './Auth/Auth'
 import Login from './Auth/Login';
 import SignUp from './Auth/SignUp';
 import Home from './Home/Home';
 import Test from '../Test';
+import { wsLink } from '../App'
 
 export const AuthContext = createContext();
 
@@ -24,20 +26,31 @@ mutation login($password: String!, $email: String!){
         token
         success
         message
+        user {
+          name
+          lastName
+          email
+        }
     }
 }
 `
 
 const SIGNUP = gql`
 mutation signUp($password: String!, $email: String!, $name: String!, $lastName: String!){
-    login(password: $password, email: $email, name: $name, lastName: $lastName) {
+    signUp(password: $password, email: $email, name: $name, lastName: $lastName) {
         token
         success
+        user{
+          name
+          lastName
+          email
+        }
     }
 }
 `
 
 export default function Navigation() {
+    const [userInfo, setUserInfo] = useState({})
     const [state, dispatch] = useReducer(
         (prevState, action) => {
           switch (action.type) {
@@ -91,32 +104,44 @@ export default function Navigation() {
             const res = await login({variables:{email:data.email, password:data.password}});
             if (res.data.login.success){
                 await AsyncStorage.setItem('userToken', res.data.login.token);
+                wsLink.subscriptionClient.tryReconnect(); //Restarting ws connection for authentication purposes
                 dispatch({ type: 'SIGN_IN', token: res.data.login.token });
+                setUserInfo({name: res.data.login.user.name, lastName: res.data.login.user.lastName, email: res.data.login.user.email})
             } else
                 return res;
           },
           signOut: async () => {
             await AsyncStorage.removeItem('userToken');
             dispatch({ type: 'SIGN_OUT' });
+            setUserInfo({})
           },
           signUp: async data => {
-            const res = await signUp({variables:{email:data.email, password:data.password, name:data.name, lastName:data.lastName}});
-            console.log(res)
-            if (res.data)
-                dispatch({ type: 'SIGN_IN', token: res.data.signUp.token });
-            else
-                return res;
+            try {
+              const res = await signUp({variables:{email:data.email, password:data.password, name:data.name, lastName:data.lastName}});
+              await AsyncStorage.setItem('userToken', res.data.signUp.token);
+              wsLink.subscriptionClient.tryReconnect(); //Restarting ws connection for authentication purposes
+              dispatch({ type: 'SIGN_IN', token: res.data.signUp.token });
+              setUserInfo({name: res.data.signUp.name, lastName: res.data.signUp.lastName, email: res.data.signUp.email})
+            } catch (err) {
+              return err;
+            }
           },
         }),
         []
       );
 
     return (
-        <AuthContext.Provider value={authContext}>
+        <AuthContext.Provider value={{authContext: authContext, userInfo: userInfo}}>
             <NavigationContainer>
                 {
                     state.userToken == null ? (
                         <AuthStack.Navigator>
+                          <AuthStack.Screen 
+                            name="Auth"
+                            component={Auth}
+                            options={{
+                                headerShown: false,
+                            }}/>
                             <AuthStack.Screen 
                             name="Login"
                             component={Login}
