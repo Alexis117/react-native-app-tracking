@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, gql } from '@apollo/client'
+import { FontAwesome5 } from '@expo/vector-icons'; 
 
 import { Text } from 'react-native';
 
@@ -156,9 +157,27 @@ export default function Navigation() {
                             }}/>
                         </AuthStack.Navigator>
                     ) : (
-                        <Tab.Navigator tabBarOptions={{keyboardHidesTabBar: true}}>
+                        <Tab.Navigator 
+                          tabBarOptions={{keyboardHidesTabBar: true}}
+                          screenOptions={({ route }) => ({
+                            tabBarIcon: ({ focused, color, size }) => {
+                              let iconName;
+                              if (route.name === 'Home') {
+                                iconName = 'home';
+                              } else if (route.name === 'My Location') {
+                                iconName = 'map-marker';
+                              }
+                              // You can return any component that you like here!
+                              return <FontAwesome5 name={iconName} size={24} color={color} />;
+                            },
+                          })}
+                          tabBarOptions={{
+                            activeTintColor: 'black',
+                            inactiveTintColor: 'gray',
+                          }}
+                          >
                             <Tab.Screen name="Home" component={Home} />
-                            <Tab.Screen name="Pedidos" component={Test} />
+                            <Tab.Screen name="My Location" component={Test} />
                         </Tab.Navigator>
                     )
                 }
