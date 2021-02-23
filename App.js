@@ -15,11 +15,10 @@ const httpLink = new HttpLink({
 
 const authLink = setContext(async (_, { headers }) => {
   const token = await AsyncStorage.getItem("userToken")
-  console.log(token)
   return {
     headers: {
-      ...Headers,
-      Authorization: token ? token: ""  
+        ...Headers,
+        Authorization: token ? token : ""  
       }
   }
 });
