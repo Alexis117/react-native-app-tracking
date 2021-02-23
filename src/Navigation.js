@@ -13,6 +13,8 @@ import Login from './Auth/Login';
 import SignUp from './Auth/SignUp';
 import Home from './Home/Home';
 import Test from '../Test';
+import MyLocation from './Tracking/MyLocation'
+
 import { wsLink } from '../App'
 
 export const AuthContext = createContext();
@@ -177,7 +179,7 @@ export default function Navigation() {
                           }}
                           >
                             <Tab.Screen name="Home" component={Home} />
-                            <Tab.Screen name="My Location" component={Test} />
+                            <Tab.Screen name="My Location" component={MyLocation} />
                         </Tab.Navigator>
                     )
                 }
