@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
+import { useMutation, gql } from '@apollo/client'
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import * as Permissions from 'expo-permissions';
+
+const UPDATE_LOCATION = gql`
+mutation updateLocation($latitude:String, $longitude:String) {
+    updateLocation(latitude: $latitude, longitude: $longitude) {
+        success
+    }
+}
+`
 
 export default function MyLocation() {
     const [location, setLocation] = useState(null);
     const [latitudeDelta, setLatitudeDelta] = useState(0.0922);
     const [longitudeDelta, setLongitudeDelta] = useState(0.0421);
     const [isLocationActive, setIsLocationActive] = useState(false);
+
+    const [ updateLocation ] = useMutation(UPDATE_LOCATION)
 
     useEffect(() => {
         (async () => {
@@ -23,7 +34,7 @@ export default function MyLocation() {
           setLocation(loc);
           const options = {
               accuracy: 4,
-              distanceInterval: 10
+              distanceInterval: 1
           }
 
           const isLocationActive = await Location.hasStartedLocationUpdatesAsync('LOCATION_SHARE_TASK')
@@ -40,12 +51,18 @@ export default function MyLocation() {
             return;
         }
         console.log('Received new locations', locations);
+        updateLocation({variables:{latitude: locations[0].coords.latitude, longitude: locations[0].coords.longitude}}).then(
+            res => console.log('')
+        ).catch(
+            err => console.log(err)
+        )
+        
     });
 
     async function startSharingLocation() {
         const options = {
             accuracy: 4,
-            distanceInterval: 10,
+            distanceInterval: 1,
             showsBackgroundLocationIndicator: true,
             foregroundService: {
                 notificationTitle: 'Sharing your location',
