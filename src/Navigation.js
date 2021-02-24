@@ -14,6 +14,7 @@ import SignUp from './Auth/SignUp';
 import Home from './Home/Home';
 import Test from '../Test';
 import MyLocation from './Tracking/MyLocation'
+import UserLocation from './Tracking/UserLocation'
 
 import { wsLink } from '../App'
 
@@ -22,6 +23,8 @@ export const AuthContext = createContext();
 const AuthStack = createStackNavigator();
 
 const Tab = createBottomTabNavigator();
+
+const HomeStack = createStackNavigator();
 
 const LOGIN = gql`
 mutation login($password: String!, $email: String!){
@@ -133,6 +136,25 @@ export default function Navigation() {
         []
       );
 
+    function HomeStackNavigator() {
+      return(
+        <HomeStack.Navigator>
+          <HomeStack.Screen
+            name="Home"
+            component={Home}
+            options={{
+              headerShown: false,
+          }}/>
+          <HomeStack.Screen
+            name="UserLocation"
+            component={UserLocation}
+            options={{
+              headerShown: false,
+          }}/>
+        </HomeStack.Navigator>
+      )
+    }
+
     return (
         <AuthContext.Provider value={{authContext: authContext, userInfo: userInfo}}>
             <NavigationContainer>
@@ -178,7 +200,7 @@ export default function Navigation() {
                             inactiveTintColor: 'gray',
                           }}
                           >
-                            <Tab.Screen name="Home" component={Home} />
+                            <Tab.Screen name="Home" component={HomeStackNavigator} />
                             <Tab.Screen name="My Location" component={MyLocation} />
                         </Tab.Navigator>
                     )

@@ -4,7 +4,7 @@ import { Text, StyleSheet, View, TouchableOpacity, StatusBar } from 'react-nativ
 import { AuthContext } from '../Navigation'
 import SearchTable from './SearchTable'
 
-export default function Home() {
+export default function Home(props) {
     const { signOut } = useContext(AuthContext).authContext;
     const { userInfo } = useContext(AuthContext)
 
@@ -26,7 +26,7 @@ export default function Home() {
                 </View>
             </View>
             <View style={styles.searchContainer}>
-                <SearchTable userInfo={userInfo}></SearchTable>
+                <SearchTable userInfo={userInfo} navigation={props.navigation}></SearchTable>
             </View>
         </View>
     )

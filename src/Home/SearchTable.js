@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Scrol } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { useQuery, useMutation, gql } from '@apollo/client'
 
 const GET_USERS = gql`
@@ -57,9 +57,12 @@ export default function SearchTable(props) {
                                     <TouchableOpacity
                                         style = {styles.button}
                                         onPress = {() => {
-                                            shareStatus({variables:{id:item.id}}).then(
-                                                res => console.log(res)
-                                            )
+                                            shareStatus({variables:{id:item.id}}).then(res => {
+                                                if (!res.data.shareStatus.isSharing)
+                                                    Alert.alert('Not able to track', 'User is not sharing his location')
+                                                else 
+                                                    props.navigation.navigate('UserLocation', {user: item, location: res.data.shareStatus})
+                                            })
                                         }}
                                     >
                                         <Text style={styles.buttonText}>Track</Text>
