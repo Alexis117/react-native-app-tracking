@@ -14,13 +14,31 @@ mutation updateLocation($latitude:String, $longitude:String) {
 }
 `
 
+const UPDATE_LAST_LOCATION = gql`
+mutation updateLastUserLocation($latitude:String, $longitude:String) {
+    updateLastUserLocation(latitude: $latitude, longitude: $longitude) {
+        success
+    }
+}
+`
+
+const UPDATE_SHARING_STATUS = gql`
+mutation updateSharingStatus($activate:Boolean) {
+    updateSharingStatus(activate: $activate) {
+        message
+    }
+}
+`
+
 export default function MyLocation() {
     const [location, setLocation] = useState(null);
     const [latitudeDelta, setLatitudeDelta] = useState(0.0922);
     const [longitudeDelta, setLongitudeDelta] = useState(0.0421);
     const [isLocationActive, setIsLocationActive] = useState(false);
 
-    const [ updateLocation ] = useMutation(UPDATE_LOCATION)
+    const [ updateLocation ] = useMutation(UPDATE_LOCATION);
+    const [ updateLastUserLocation ] = useMutation(UPDATE_LAST_LOCATION);
+    const [ updateSharingStatus ] = useMutation(UPDATE_SHARING_STATUS);
 
     useEffect(() => {
         (async () => {
@@ -30,15 +48,22 @@ export default function MyLocation() {
             return;
           }
     
-          let loc = await Location.getCurrentPositionAsync({});
-          setLocation(loc);
+          let location = await Location.getCurrentPositionAsync({});
+          setLocation(location);
+          updateLastUserLocation({
+              variables:{
+                  latitude: String(location.coords.latitude), 
+                  longitude: String(location.coords.longitude)
+                }
+            })
+
           const options = {
               accuracy: 4,
               distanceInterval: 1
           }
 
-          const isLocationActive = await Location.hasStartedLocationUpdatesAsync('LOCATION_SHARE_TASK')
-          setIsLocationActive (isLocationActive)
+          const isLocationActive = await Location.hasStartedLocationUpdatesAsync('LOCATION_SHARE_TASK');
+          setIsLocationActive (isLocationActive);
           
           //Looks for position only when apps is in use
           //Location.watchPositionAsync(options, response => setLocation(response))
@@ -73,11 +98,13 @@ export default function MyLocation() {
 
         await Location.startLocationUpdatesAsync('LOCATION_SHARE_TASK', options)
         setIsLocationActive(true)
+        updateSharingStatus({variables:{activate:true}})
     }
 
     async function stopSharingLocation() {
         await Location.stopLocationUpdatesAsync('LOCATION_SHARE_TASK')
         setIsLocationActive(false)
+        updateSharingStatus({variables:{activate:false}})
     }
 
     if (location)
