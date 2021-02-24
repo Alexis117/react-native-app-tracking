@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Scrol } from 'react-native';
-import { useQuery, gql } from '@apollo/client'
-import { printIntrospectionSchema } from 'graphql';
+import { useQuery, useMutation, gql } from '@apollo/client'
 
 const GET_USERS = gql`
 query allUsersFilter($searchString:String){
@@ -10,12 +9,25 @@ query allUsersFilter($searchString:String){
         name
         lastName
         email
+        sharingLocation
     }
 }
 `
+
+const IS_USER_SHARING_LOCATION = gql`
+mutation shareStatus($id:String) {
+    shareStatus(id:$id){
+        isSharing
+        latitude
+        longitude
+    }
+}
+`
+
 export default function SearchTable(props) {
     const [ search, setSearch ] = useState('')
     const { data, loading, error } = useQuery(GET_USERS, {variables:{searchString:search}});
+    const [ shareStatus ] = useMutation(IS_USER_SHARING_LOCATION)
 
     if (error) console.log(error)
 
@@ -44,7 +56,11 @@ export default function SearchTable(props) {
                                 <View style={styles.column}>
                                     <TouchableOpacity
                                         style = {styles.button}
-                                        onPress = {() => signOut()}
+                                        onPress = {() => {
+                                            shareStatus({variables:{id:item.id}}).then(
+                                                res => console.log(res)
+                                            )
+                                        }}
                                     >
                                         <Text style={styles.buttonText}>Track</Text>
                                     </TouchableOpacity>
