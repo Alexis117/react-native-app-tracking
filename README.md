@@ -4,4 +4,6 @@ This is an app built with React Native and Expo that allows to register users an
 
 This App works together with a GraphQL API built with Python and Flask.
 
-![ScreenShot](/assets/screenshot1.jpeg | width=100)
+<img src="/assets/screenshot1.jpeg" width="48">
+
+![ScreenShot](/assets/screenshot1.jpeg)
